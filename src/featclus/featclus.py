@@ -13,7 +13,7 @@ from sklearn.metrics import silhouette_score
 from joblib import Parallel, delayed
 
 import plotly.express as px
-
+import gower
 
 class FeatureSelection:
     """
@@ -40,11 +40,12 @@ class FeatureSelection:
                 ("scaler", MinMaxScaler()),
                 ("pca", PCA(0.8)),
                 ("clustering", DBSCAN()),
-            ]
-        )):
+            ]),
+            use_gower: bool = False):
         self.data = data
         self.shifts = shifts
         self.model = model
+        self.use_gower = use_gower
         self.columns = data.columns
         self.n_jobs = n_jobs
         self.cache_history = 0
@@ -116,7 +117,10 @@ class FeatureSelection:
         """
         This function calculates the silhouete score for each model created.
         """
-        labels = self.model.fit_predict(df)
+        if self.use_gower:
+            labels = self.model.fit_predict(gower.gower_matrix(df.astype('float64')))
+        else:
+            labels = self.model.fit_predict(df)
         score = silhouette_score(X=df, labels=labels)
         return score
 
