@@ -35,21 +35,21 @@ class FeatureSelection:
         pd.DataFrame: A DataFrame with the importance of each feature sorted.
     """
 
-    def __init__(self, data: pd.DataFrame, shifts: List = [5, 10, 50], n_jobs: int = 1, dbscan_eps: float = 0.25):
-        self.data = data
-        self.shifts = shifts
-        self.model = Pipeline(
+    def __init__(self, data: pd.DataFrame, shifts: List = [5, 10, 50], n_jobs: int = 1, model: Pipeline = Pipeline(
             steps=[
                 ("scaler", MinMaxScaler()),
                 ("pca", PCA(0.8)),
-                ("clustering", DBSCAN(eps=dbscan_eps)),
+                ("clustering", DBSCAN()),
             ]
-        )
+        )):
+        self.data = data
+        self.shifts = shifts
+        self.model = model
         self.columns = data.columns
         self.n_jobs = n_jobs
         self.cache_history = 0
         self.results = None
-
+            
     def _shift_data_sc(
         self, df: pd.DataFrame, target_column: str
     ) -> List[pd.DataFrame]:
